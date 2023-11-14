@@ -21,10 +21,19 @@ ament_target_dependencies(talker rclcpp std_msgs)
 add_executable(listener src/subscriber_member_function.cpp)
 ament_target_dependencies(listener rclcpp std_msgs)
 
+add_executable(server src/server.cpp)
+ament_target_dependencies(server rclcpp std_msgs)
+
 install(TARGETS
   talker
   listener
+  server
   DESTINATION lib/${PROJECT_NAME})
+
+rosidl_target_interfaces(server 
+${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces(talker 
+${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -38,4 +47,5 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_dependencies(rosidl_default_runtime)
 ament_package()

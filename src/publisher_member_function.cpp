@@ -17,8 +17,9 @@
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include "std_msgs/msg/string.hpp"
+#include <beginner_tutorials/srv/string_change.hpp>
 
 using namespace std::chrono_literals;
 
@@ -37,7 +38,7 @@ class MinimalPublisher : public rclcpp::Node {
     client_ = this->create_client<beginner_tutorials::srv::StringChange>("string_change_service");
     RCLCPP_DEBUG(this->get_logger(), "Client created");
 
-    while (!client->wait_for_service(1s)) {
+    while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
         RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), "Service Interrupted");
         exit(EXIT_FAILURE);
@@ -61,12 +62,12 @@ class MinimalPublisher : public rclcpp::Node {
     request->input = "String Changed!!";
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Serive Called");
     auto callback = std::bind(&MinimalPublisher::service_callback, this, std::placeholders::_1);
-    client_->async_send_request(request, callback)
+    client_->async_send_request(request, callback);
   }
 
-  void service_callback(){
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got string: " << future.get()->c);
-    std::string msg = future.get()->c;
+  void service_callback(rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedFuture future){
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got string: " << future.get()->output);
+    std::string msg = future.get()->output;
   }
 
   rclcpp::TimerBase::SharedPtr timer_;

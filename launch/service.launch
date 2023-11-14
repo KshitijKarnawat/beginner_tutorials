@@ -6,12 +6,12 @@
     <arg name="pub_freq" default="1.0"/>
   
     <!-- start a node -->
-    <node pkg="buginner_tutorials" exec="listener" name="talker" output="screen"/>
+    <node pkg="beginner_tutorials" exec="listener" name="talker" output="screen"/>
 
-    <node pkg="buginner_tutorials" exec="server" name="server" output="screen"/>
+    <node pkg="beginner_tutorials" exec="server" name="server" output="screen"/>
 
     <!-- start another node and use args to set parameters -->
-    <node pkg="buginner_tutorials" exec="talker" name="listener" output="screen">
+    <node pkg="beginner_tutorials" exec="talker" name="listener" output="screen">
         <param name="pub_freq" value="$(var pub_freq)"/>
     </node>
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package contains code for a simple `publisher` and `subscriber` written in C++ for ROS2 (Humble).
+This package contains code for a simple `publisher` and `subscriber` written in C++ for ROS2 (Humble). Along with services.
 
 ## Building and Running
 
@@ -14,8 +14,6 @@ cd < path_to_your_workspace >/src
 # For cloning using SSH
 git clone git@github.com:KshitijKarnawat/beginner_tutorials.git
 
-# For cloning using HTTPS
-git clone https://github.com/KshitijKarnawat/beginner_tutorials.git
 ```
 
 ### Building
@@ -32,14 +30,14 @@ colcon build
 colcon build --package-select beginner_tutorials
 
 # Source your setup file
-. install/setup.bash
+source install/setup.bash
 ```
 
 ### Running
 
 We first run the `subscriber` so that we don't lose any of the data the `publisher` has already published.
 
-To run the `publisher` and `subscriber`.
+To run the `publisher`, `server` and `subscriber`.
 
 ```sh
 # Runs the subscriber
@@ -58,6 +56,30 @@ cd < path_to_your_workspace >
 ros2 run beginner_tutorial talker
 ```
 
+Again in a new terminal
+
+```sh
+cd < path_to_your_workspace >
+
+# Source your setup file
+. install/setup.bash
+
+# Runs the server
+ros2 run beginner_tutorial server
+```
+
+Alternatively you can run all three at once using the launch file
+
+```sh
+cd < path_to_your_workspace >
+
+# Using ROS2 Launch 
+ros2 launch beginner_tutorial server.launch
+
+# You can also edit the publishing frequency using the launch file
+ros2 launch beginner_tutorial server.launch pub_freq:=< double value >
+```
+
 ## Dependencies
 
 - [ROS2 Humble](https://docs.ros.org/en/humble/index.html)
@@ -67,3 +89,7 @@ ros2 run beginner_tutorial talker
 ## Assumptions
 
 The above instruction assume that you have installed all the Dependecies and are working on a Ubuntu 22.04 LTS system and have created your ROS2 workspace beforehand.
+
+## Results
+
+Results for `cppcheck`, `cpplint` and `rqt-gui` can be viewed in `results`` folder

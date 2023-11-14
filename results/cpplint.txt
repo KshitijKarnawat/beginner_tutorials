@@ -1,0 +1,4 @@
+cpplint --filter=-build/c++11,+build/c++17,-build/namespaces,-build/include_order  src/*.cpp
+Done processing src/publisher_member_function.cpp
+Done processing src/server.cpp
+Done processing src/subscriber_member_function.cpp

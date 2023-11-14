@@ -35,6 +35,12 @@ ${PROJECT_NAME} "rosidl_typesupport_cpp")
 rosidl_target_interfaces(talker 
 ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

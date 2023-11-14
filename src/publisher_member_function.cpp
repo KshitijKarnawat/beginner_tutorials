@@ -74,11 +74,11 @@ class MinimalPublisher : public rclcpp::Node {
 
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
-        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"),
+        RCLCPP_FATAL_STREAM(this->get_logger(),
                             "Service Interrupted");
         exit(EXIT_FAILURE);
       }
-      RCLCPP_WARN_STREAM(rclcpp::get_logger("rclcpp"), "Service Unavailable");
+      RCLCPP_WARN_STREAM(this->get_logger(), "Service Unavailable");
     }
   }
 
@@ -103,11 +103,11 @@ class MinimalPublisher : public rclcpp::Node {
   void service_call() {
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
-        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"),
+        RCLCPP_ERROR_STREAM(this->get_logger(),
                             "Service Interrupted");
         exit(EXIT_FAILURE);
       }
-      RCLCPP_WARN_STREAM(rclcpp::get_logger("rclcpp"), "Service Unavailable");
+      RCLCPP_WARN_STREAM(this->get_logger(), "Service Unavailable");
     }
     auto request =
         std::make_shared<beginner_tutorials::srv::StringChange::Request>();

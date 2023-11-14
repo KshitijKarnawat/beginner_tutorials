@@ -40,40 +40,52 @@ class MinimalPublisher : public rclcpp::Node {
 
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
-        RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), "Service Interrupted");
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "Service Interrupted");
         exit(EXIT_FAILURE);
       }
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Service Unavailable");
+      RCLCPP_WARN_STREAM(rclcpp::get_logger("rclcpp"), "Service Unavailable");
     }
 
   }
 
  private:
   void timer_callback() {
-    auto message = std_msgs::msg::String();
     message.data = "Go Terps!!" + std::to_string(count_++);
     RCLCPP_INFO_STREAM(this->get_logger(), "Publishing: " << message.data);
     publisher_->publish(message);
+    if (count_ % 10 == 0){
+      service_call();
+    }
   }
 
 
   void service_call(){
+    while (!client_->wait_for_service(1s)) {
+      if (!rclcpp::ok()) {
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "Service Interrupted");
+        exit(EXIT_FAILURE);
+      }
+      RCLCPP_WARN_STREAM(rclcpp::get_logger("rclcpp"), "Service Unavailable");
+    }
     auto request = std::make_shared<beginner_tutorials::srv::StringChange::Request>();
     request->input = "String Changed!!";
-    RCLCPP_DEBUG_STREAM(this->get_logger(), "Serive Called");
-    auto callback = std::bind(&MinimalPublisher::service_callback, this, std::placeholders::_1);
-    client_->async_send_request(request, callback);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Serivce Called");
+    auto result = client_->async_send_request(request, std::bind(&MinimalPublisher::service_callback, this, std::placeholders::_1));
+    // return result.get()->output;
   }
 
   void service_callback(rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedFuture future){
     RCLCPP_INFO_STREAM(this->get_logger(), "Got string: " << future.get()->output);
-    std::string msg = future.get()->output;
+    message.data = future.get()->output + std::to_string(count_++);
+    publisher_->publish(message);
   }
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   size_t count_;
   rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedPtr client_;
+  std_msgs::msg::String message;
+
 };
 
 int main(int argc, char * argv[]) {

@@ -1,0 +1,18 @@
+<!-- example.launch.xml -->
+
+<launch>
+
+    <!-- args that can be set from the command line or a default will be used -->
+    <arg name="pub_freq" default="1.0"/>
+  
+    <!-- start a node -->
+    <node pkg="beginner_tutorials" exec="listener" name="talker" output="screen"/>
+
+    <node pkg="beginner_tutorials" exec="server" name="server" output="screen"/>
+
+    <!-- start another node and use args to set parameters -->
+    <node pkg="beginner_tutorials" exec="talker" name="listener" output="screen">
+        <param name="pub_freq" value="$(var pub_freq)"/>
+    </node>
+
+</launch>

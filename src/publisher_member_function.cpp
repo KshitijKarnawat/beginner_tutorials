@@ -29,6 +29,17 @@ using namespace std::chrono_literals;
 class MinimalPublisher : public rclcpp::Node {
  public:
   MinimalPublisher() : Node("minimal_publisher"), count_(0) {
+
+    auto parameter_description = rcl_interfaces::msg::ParameterDescriptor();
+    parameter_description.description = "Set publisher frequency.";
+    this->declare_parameter("pub_freq", 1.0, parameter_description);
+    auto parameter = this->get_parameter("pub_freq");
+    auto pub_freq = parameter.get_parameter_value().get<std::float_t>();
+    RCLCPP_DEBUG(this->get_logger(), "Publishing frequency is set to 1.0 hz");
+
+    parameter_event_handler_ = std::make_shared<rclcpp::ParameterEventHandler>(this);
+    parameter_callback_ = parameter_event_handler_->add_parameter_callback("pub_freq", std::bind(&MinimalPublisher::parameter_callback, this, std::placeholders::_1));
+
     publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Publisher Created");
 
@@ -58,7 +69,6 @@ class MinimalPublisher : public rclcpp::Node {
     }
   }
 
-
   void service_call(){
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
@@ -80,11 +90,24 @@ class MinimalPublisher : public rclcpp::Node {
     publisher_->publish(message);
   }
 
+  void parameter_callback(const rclcpp::Parameter &parameter){
+    RCLCPP_WARN_STREAM(this->get_logger(), "Parameter " << parameter.get_name() << "updated.");
+
+    RCLCPP_FATAL_EXPRESSION(this->get_logger(), parameter.as_double() == 0.0, "Frequency cannot be set to zero due to zero division error");
+    if (parameter.as_double() == 0.0) {
+      RCLCPP_ERROR_STREAM(this->get_logger(), "Frequency has not been changed.");
+    } else {
+      timer_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int>((1000 / parameter.as_double()))), std::bind(&MinimalPublisher::timer_callback, this));
+    }
+  }
+
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   size_t count_;
   rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedPtr client_;
   std_msgs::msg::String message;
+  std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
+  std::shared_ptr<rclcpp::ParameterCallbackHandle> parameter_callback_;
 
 };
 

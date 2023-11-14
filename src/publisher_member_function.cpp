@@ -29,21 +29,50 @@ class MinimalPublisher : public rclcpp::Node {
  public:
   MinimalPublisher() : Node("minimal_publisher"), count_(0) {
     publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Publisher Created");
+
     timer_ = this->create_wall_timer(
       500ms, std::bind(&MinimalPublisher::timer_callback, this));
+
+    client_ = this->create_client<beginner_tutorials::srv::StringChange>("string_change_service");
+    RCLCPP_DEBUG(this->get_logger(), "Client created");
+
+    while (!client->wait_for_service(1s)) {
+      if (!rclcpp::ok()) {
+        RCLCPP_FATAL(rclcpp::get_logger("rclcpp"), "Service Interrupted");
+        exit(EXIT_FAILURE);
+      }
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Service Unavailable");
+    }
+
   }
 
  private:
   void timer_callback() {
     auto message = std_msgs::msg::String();
     message.data = "Go Terps!!" + std::to_string(count_++);
-    RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+    RCLCPP_INFO_STREAM(this->get_logger(), "Publishing: " << message.data);
     publisher_->publish(message);
+  }
+
+
+  void service_call(){
+    auto request = std::make_shared<beginner_tutorials::srv::StringChange::Request>();
+    request->input = "String Changed!!";
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Serive Called");
+    auto callback = std::bind(&MinimalPublisher::service_callback, this, std::placeholders::_1);
+    client_->async_send_request(request, callback)
+  }
+
+  void service_callback(){
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got string: " << future.get()->c);
+    std::string msg = future.get()->c;
   }
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   size_t count_;
+  rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedPtr client_;
 };
 
 int main(int argc, char * argv[]) {

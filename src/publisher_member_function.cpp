@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * @file publisher_member_function.cpp
+ * @author Kshitij Karnawat (kshitij@terpmail.umd.edu)
+ * @brief Publisher with services.
+ * @version 0.1
+ * @date 2023-11-14
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -26,8 +37,16 @@ using namespace std::chrono_literals;
 /* This example creates a subclass of Node and uses std::bind() to register a
  * member function as a callback from the timer. */
 
+/**
+ * @brief Class for Publisher
+ * 
+ */
 class MinimalPublisher : public rclcpp::Node {
  public:
+  /**
+  * @brief Construct a new Minimal Publisher object
+  * 
+  */
   MinimalPublisher() : Node("minimal_publisher"), count_(0) {
 
     auto parameter_description = rcl_interfaces::msg::ParameterDescriptor();
@@ -35,7 +54,7 @@ class MinimalPublisher : public rclcpp::Node {
     this->declare_parameter("pub_freq", 1.0, parameter_description);
     auto parameter = this->get_parameter("pub_freq");
     auto pub_freq = parameter.get_parameter_value().get<std::float_t>();
-    RCLCPP_DEBUG(this->get_logger(), "Publishing frequency is set to 1.0 hz");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Publishing frequency is set to 1.0 hz");
 
     parameter_event_handler_ = std::make_shared<rclcpp::ParameterEventHandler>(this);
     parameter_callback_ = parameter_event_handler_->add_parameter_callback("pub_freq", std::bind(&MinimalPublisher::parameter_callback, this, std::placeholders::_1));
@@ -47,7 +66,7 @@ class MinimalPublisher : public rclcpp::Node {
       500ms, std::bind(&MinimalPublisher::timer_callback, this));
 
     client_ = this->create_client<beginner_tutorials::srv::StringChange>("string_change_service");
-    RCLCPP_DEBUG(this->get_logger(), "Client created");
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Client created");
 
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
@@ -60,6 +79,10 @@ class MinimalPublisher : public rclcpp::Node {
   }
 
  private:
+  /**
+   * @brief timer callback function
+   * 
+   */
   void timer_callback() {
     message.data = "Go Terps!!" + std::to_string(count_++);
     RCLCPP_INFO_STREAM(this->get_logger(), "Publishing: " << message.data);
@@ -69,6 +92,10 @@ class MinimalPublisher : public rclcpp::Node {
     }
   }
 
+  /**
+   * @brief calls the service
+   * 
+   */
   void service_call(){
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
@@ -84,12 +111,22 @@ class MinimalPublisher : public rclcpp::Node {
     // return result.get()->output;
   }
 
+  /**
+   * @brief Service callback funtion
+   * 
+   * @param future 
+   */
   void service_callback(rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedFuture future){
     RCLCPP_INFO_STREAM(this->get_logger(), "Got string: " << future.get()->output);
     message.data = future.get()->output + std::to_string(count_++);
     publisher_->publish(message);
   }
 
+  /**
+   * @brief Parameter callback server. Adjusts the parameters
+   * 
+   * @param parameter 
+   */
   void parameter_callback(const rclcpp::Parameter &parameter){
     RCLCPP_WARN_STREAM(this->get_logger(), "Parameter " << parameter.get_name() << "updated.");
 
@@ -111,6 +148,13 @@ class MinimalPublisher : public rclcpp::Node {
 
 };
 
+/**
+ * @brief Main function
+ * 
+ * @param argc 
+ * @param argv 
+ * @return int 
+ */
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<MinimalPublisher>());

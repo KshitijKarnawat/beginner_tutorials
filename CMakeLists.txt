@@ -30,10 +30,11 @@ install(TARGETS
   server
   DESTINATION lib/${PROJECT_NAME})
 
-rosidl_target_interfaces(server 
-${PROJECT_NAME} "rosidl_typesupport_cpp")
-rosidl_target_interfaces(talker 
-${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+target_link_libraries(talker "${cpp_typesupport_target}")
+target_link_libraries(server "${cpp_typesupport_target}")
 
 install(
   DIRECTORY launch

@@ -51,14 +51,11 @@ class MinimalPublisher : public rclcpp::Node {
    *
    */
   MinimalPublisher() : Node("minimal_publisher"), count_(0) {
-
     // Set the publisher frequency
     // Parmeter
     auto parameter_description = rcl_interfaces::msg::ParameterDescriptor();
     parameter_description.description = "Set publisher frequency.";
     this->declare_parameter("pub_freq", 1.0, parameter_description);
-    auto parameter = this->get_parameter("pub_freq");
-    // auto pub_freq = parameter.get_parameter_value().get<std::float_t>();
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Publishing frequency is set to 1.0 hz");
 
@@ -93,7 +90,7 @@ class MinimalPublisher : public rclcpp::Node {
     // Broadcaster
     tf_static_broadcaster_ =
         std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
-    
+
     geometry_msgs::msg::TransformStamped t;
 
     t.header.stamp = this->get_clock()->now();

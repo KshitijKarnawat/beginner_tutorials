@@ -51,8 +51,7 @@ class MinimalPublisher : public rclcpp::Node {
     auto parameter_description = rcl_interfaces::msg::ParameterDescriptor();
     parameter_description.description = "Set publisher frequency.";
     this->declare_parameter("pub_freq", 1.0, parameter_description);
-    auto parameter = this->get_parameter("pub_freq");
-    // auto pub_freq = parameter.get_parameter_value().get<std::float_t>();
+    // auto parameter = this->get_parameter("pub_freq");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Publishing frequency is set to 1.0 hz");
 

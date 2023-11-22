@@ -29,7 +29,10 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <string>
-
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
@@ -48,10 +51,11 @@ class MinimalPublisher : public rclcpp::Node {
    *
    */
   MinimalPublisher() : Node("minimal_publisher"), count_(0) {
+    // Set the publisher frequency
+    // Parmeter
     auto parameter_description = rcl_interfaces::msg::ParameterDescriptor();
     parameter_description.description = "Set publisher frequency.";
     this->declare_parameter("pub_freq", 1.0, parameter_description);
-    // auto parameter = this->get_parameter("pub_freq");
     RCLCPP_DEBUG_STREAM(this->get_logger(),
                         "Publishing frequency is set to 1.0 hz");
 
@@ -61,12 +65,15 @@ class MinimalPublisher : public rclcpp::Node {
         "pub_freq", std::bind(&MinimalPublisher::parameter_callback, this,
                               std::placeholders::_1));
 
+    // Publisher
     publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Publisher Created");
 
+    // Timer
     timer_ = this->create_wall_timer(
         500ms, std::bind(&MinimalPublisher::timer_callback, this));
 
+    // Service
     client_ = this->create_client<beginner_tutorials::srv::StringChange>(
         "string_change_service");
     RCLCPP_DEBUG_STREAM(this->get_logger(), "Client created");
@@ -79,6 +86,27 @@ class MinimalPublisher : public rclcpp::Node {
       }
       RCLCPP_WARN_STREAM(this->get_logger(), "Service Unavailable");
     }
+
+    // Broadcaster
+    tf_static_broadcaster_ =
+        std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
+
+    geometry_msgs::msg::TransformStamped t;
+
+    t.header.stamp = this->get_clock()->now();
+    t.header.frame_id = "world";
+    t.child_frame_id = "talk";
+
+    t.transform.translation.x = 0.1;
+    t.transform.translation.y = 0.1;
+    t.transform.translation.z = 0.1;
+
+    t.transform.rotation.x = 0.141592;
+    t.transform.rotation.y = 0.141592;
+    t.transform.rotation.z = 0.141592;
+    t.transform.rotation.w = 0.5;
+
+    tf_static_broadcaster_->sendTransform(t);
   }
 
  private:
@@ -162,6 +190,7 @@ class MinimalPublisher : public rclcpp::Node {
   std_msgs::msg::String message;
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
   std::shared_ptr<rclcpp::ParameterCallbackHandle> parameter_callback_;
+  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_static_broadcaster_;
 };
 
 /**

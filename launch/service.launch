@@ -4,6 +4,8 @@
 
     <!-- args that can be set from the command line or a default will be used -->
     <arg name="pub_freq" default="1.0"/>
+    <arg name="record" default="false"/>
+    <arg name="bag_name" default="tutorial_bagfile"/>
   
     <!-- start a node -->
     <node pkg="beginner_tutorials" exec="listener" name="talker" output="screen"/>
@@ -14,5 +16,7 @@
     <node pkg="beginner_tutorials" exec="talker" name="listener" output="screen">
         <param name="pub_freq" value="$(var pub_freq)"/>
     </node>
+
+    <executable cmd="ros2 bag record -a --output src/beginner_tutorials/bagfiles/$(var bag_name)" if="$(var record)"/>
 
 </launch>

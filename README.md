@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package contains code for a simple `publisher` and `subscriber` written in C++ for ROS2 (Humble). Along with services.
+This package contains code for a simple `publisher` and `subscriber` written in C++ for ROS2 (Humble). Along with services. Additionally, it also contains a launch file to launch all the nodes at once and a unit test.
 
 ## Building and Running
 
@@ -78,6 +78,38 @@ ros2 launch beginner_tutorial server.launch
 
 # You can also edit the publishing frequency using the launch file
 ros2 launch beginner_tutorial server.launch pub_freq:=< double value >
+```
+
+### Testing
+
+To run the unit tests
+
+```sh
+cd < path_to_your_workspace >
+
+# Source your setup file
+. install/setup.bash
+
+# Runs the unit tests
+ros2 run beginner_tutorials test_beginner_tutorials 
+```
+
+### Running ROSBAG
+
+To record the data published by the `publisher` and `server` we can use ROSBAG.
+
+```sh
+cd < path_to_your_workspace >
+
+# Source your setup file
+. install/setup.bash
+
+# To check if the bag file is valid run the listener node (run this first as we don't want to lose any data)
+ros2 run beginner_tutorials listener
+
+# Runs the bag file
+ros2 bag play src/beginner_tutorials/bagfiles/tutorial_bagfile
+
 ```
 
 ## Dependencies

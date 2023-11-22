@@ -13,63 +13,21 @@
 #include <stdlib.h>
 #include <beginner_tutorials/srv/string_change.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <tf2_ros/transform_listener.h>
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-#include <chrono>
-#include <memory>
-class TaskPlanningFixture : public testing::Test {
- public:
 
-  void SetUp() override {
-    rclcpp::init(0, nullptr);
-
-    node_ = std::make_shared<rclcpp::Node>("test");
-    client_ = node_->create_client<beginner_tutorials::srv::StringChange>(
-        "string_change");
-
-    while (!client_->wait_for_service(1s)) {
-      if (!rclcpp::ok()) {
-        RCLCPP_FATAL_STREAM(
-            node_->get_logger(),
-            "Interrupted while waiting for the service. Exiting.");
-        exit(1);
-      }
-      RCLCPP_INFO_STREAM(node_->get_logger(),
-                         "service not available, waiting again...");
-    }
-  }
-
-  void TearDown() override {
-    rclcpp::shutdown();
-  }
-
+class Test : public testing::Test {
  protected:
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Client<beginner_tutorials::srv::StringChange>::SharedPtr client_;
 };
 
-TEST_F(TaskPlanningFixture, TrueIsTrueTest) {
-  EXPECT_EQ(1, 1);
-}
+TEST_F(Test, test_num_publishers) {
+  node_ = rclcpp::Node::make_shared("test");
+  auto pub =
+      node_->create_publisher<std_msgs::msg::String>("topic", 10.0);
 
+  auto num_pub = node_->count_publishers("topic");
 
-TEST_F(TestPub, testTF) {
-  auto tfBuffer = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-  auto listener = std::make_shared<tf2_ros::TransformListener>(*tfBuffer);
-  geometry_msgs::msg::TransformStamped transformStamped;
-  try {
-    transformStamped =
-        tfBuffer->lookupTransform("world", "talk", rclcpp::Time(0), 5s);
-  } catch (tf2::TransformException &ex) {
-    RCLCPP_ERROR(node_->get_logger(), "Failure %s ", ex.what());
-  }
-  ASSERT_EQ(transformStamped.header.frame_id, "world");
-  ASSERT_EQ(transformStamped.child_frame_id, "talk");
+  EXPECT_EQ(1, static_cast<int>(num_pub));
 }
 
 int main(int argc, char** argv) {
